@@ -1,0 +1,43 @@
+#----------------------- <+++ansible-managed-file+++> -------------------------+
+#
+#                             IMPORTANT WARNING
+#
+#  This file is managed remotely by Ansible orchestration tool. Any local
+#  changes will be overwritten without any notice !!! You have been warned !!!
+#
+#----------------------- <+++ansible-managed-file+++> -------------------------+
+{% if ivar_user in site_users and 'ssh_keys' in site_users[ivar_user] and site_users[ivar_user]['ssh_keys']|length %}
+
+#
+# SSH keys for user '{{ ivar_user }}' ({{ site_users[ivar_user]['name'] }} <{{ site_users[ivar_user]['email'] }}>)
+#
+{% for key in site_users[ivar_user]['ssh_keys'] %}
+{{ key }}
+{% endfor %}
+{%- endif %}
+{%- if 'users' in ivar_metadata and ivar_metadata['users']|length %}
+{%- for user in ivar_metadata['users']|sort %}
+{% if user in site_users and 'ssh_keys' in site_users[user] and site_users[user]['ssh_keys']|length %}
+
+#
+# SSH keys for user '{{ user }}' ({{ site_users[user]['name'] }} <{{ site_users[user]['email'] }}>)
+#
+{% for key in site_users[user]['ssh_keys'] %}
+{{ key }}
+{% endfor %}
+{%- endif %}
+{%- endfor %}
+{%- endif %}
+{%- if 'robots' in ivar_metadata and ivar_metadata['robots']|length %}
+{%- for robot in ivar_metadata['robots']|sort %}
+{% if robot in site_robots and 'ssh_keys' in site_robots[robot] and site_robots[robot]['ssh_keys']|length %}
+
+#
+# SSH keys for robot '{{ robot }}'
+#
+{% for key in site_robots[robot]['ssh_keys'] %}
+{{ key }}
+{% endfor %}
+{%- endif %}
+{%- endfor %}
+{%- endif %}

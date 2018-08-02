@@ -1,0 +1,70 @@
+---
+
+#
+# This role expects, that file 'vault/secrets.yml' is present and contains following
+# dictionaries:
+#
+# site_users:
+#    userid:
+#        name: User Name
+#        firstname: User
+#        lastname: Name
+#        email: user.name@domain.org
+#        ssh_keys:
+#            - "ssh-dss AAAA...== user@host"
+#            - "ssh-rsa AAAA...== user@host"
+#
+# site_robots:
+#    hostid:
+#        ssh_keys:
+#            - "ssh-rsa AAAA...== root@host"
+#
+# This file can be protected for example by encfs utility and decrypted only when
+# necessary. Dictionaries described above are used as registries during role
+# configuration.
+#
+
+#
+# Enable/disable OpenSSH configuration, valid values are bool [true, false]. When
+# set to ``false`` do not touch the configuration file.
+#
+hm_accounts__configure_ssh: true
+
+#
+# Enable/disable sudo configuration, valid values are bool [true, false]. When
+# set to ``false`` do not touch the configuration file.
+#
+hm_accounts__configure_sudo: true
+
+#
+# Turn on/off SSH password authentication, valid values are string ["yes","no"].
+#
+hm_accounts__password_authentication: "yes"
+
+#
+# List of all system administrators, that should have 'root' access to target system.
+# Values entered in this list are keys pointing to the 'site_users' dictionary
+# described above.
+#
+hm_accounts__admins: []
+
+#
+# List of all robots, that should have 'root' access to target system.
+# Values entered in this list are keys pointing to the 'site_robots' dictionary
+# described above.
+#
+hm_accounts__robots: []
+
+#
+# Dict of all unprivileged user groups, that should be present on target system.
+# Keys of the dictionary should be the desired system names of the groups, values
+# should be dictionaries that may contain additional parameters.
+#
+hm_accounts__groups: {}
+
+#
+# Dict of all unprivileged user accounts, that should be present on target system.
+# Keys of the dictionary should point to the 'site_users' dictionary described
+# above, values should be dictionaries that may contain additional parameters.
+#
+hm_accounts__users: {}

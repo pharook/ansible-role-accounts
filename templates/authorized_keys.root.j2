@@ -1,0 +1,30 @@
+#----------------------- <+++ansible-managed-file+++> -------------------------+
+#
+#                             IMPORTANT WARNING
+#
+#  This file is managed remotely by Ansible orchestration tool. Any local
+#  changes will be overwritten without any notice !!! You have been warned !!!
+#
+#----------------------- <+++ansible-managed-file+++> -------------------------+
+
+{% for admin in hm_accounts__admins|sort %}
+#
+# SSH keys for admin '{{ admin }}' ({{ site_users[admin]['name'] }} <{{ site_users[admin]['email'] }}>)
+#
+{% for key in site_users[admin]['ssh_keys'] %}
+{{ key }}
+{% endfor %}
+
+{% endfor %}
+{% if hm_accounts__robots|length %}
+{% for robot in hm_accounts__robots|sort %}
+
+#
+# SSH keys for robot '{{ robot }}'
+#
+{% for key in site_robots[robot]['ssh_keys'] %}
+{{ key }}
+{% endfor %}
+
+{% endfor %}
+{% endif %}

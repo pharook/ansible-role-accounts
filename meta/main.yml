@@ -1,0 +1,14 @@
+galaxy_info:
+  author: Jan Mach
+  description: Ansible role for convenient management of user accounts on target hosts.
+  license: MIT
+  min_ansible_version: 2.5
+  github_branch: master
+  platforms:
+    - name: Debian
+      versions:
+        - all
+  galaxy_tags:
+    - system
+    - management
+    - users

@@ -1,0 +1,14 @@
+---
+
+#
+# Name of the SSH service.
+#
+hm_accounts__service_name: ssh
+
+#
+# List of packages related to this role that will be installed on target hosts.
+#
+hm_accounts__install_packages:
+  - members
+  - openssh-server
+  - sudo

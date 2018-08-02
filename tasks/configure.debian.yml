@@ -1,0 +1,121 @@
+---
+
+- name: Configuring OpenSSH server
+  template:
+    src: "{{ item }}"
+    dest: /etc/ssh/sshd_config
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+  with_first_found:
+    - "host_files/{{ inventory_hostname }}/sshd_config.j2"
+    - "group_files/servers-production/sshd_config.{{ ansible_lsb['codename'] }}.j2"
+    - "group_files/servers-production/sshd_config.j2"
+    - "group_files/servers-development/sshd_config.{{ ansible_lsb['codename'] }}.j2"
+    - "group_files/servers-development/sshd_config.j2"
+    - "group_files/servers-demo/sshd_config.{{ ansible_lsb['codename'] }}.j2"
+    - "group_files/servers-demo/sshd_config.j2"
+    - "group_files/servers/sshd_config.{{ ansible_lsb['codename'] }}.j2"
+    - "group_files/servers/sshd_config.j2"
+    - "sshd_config.{{ ansible_lsb['codename'] }}.j2"
+    - "sshd_config.j2"
+  notify:
+    - Restart OpenSSH service
+  when: hm_accounts__configure_ssh
+
+- name: Ensuring OpenSSH server daemon is running and enabled at system start
+  service:
+    name: "{{ hm_accounts__service_name }}"
+    state: started
+    enabled: yes
+
+- name: Managing .ssh directory for root user
+  file:
+    path: /root/.ssh
+    owner: root
+    group: root
+    mode: 0700
+    state: directory
+
+- name: Managing SSH keys for root user
+  template:
+    src: authorized_keys.root.j2
+    dest: /root/.ssh/authorized_keys
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+
+#-------------------------------------------------------------------------------
+
+- include_tasks: _func.manage_account.debian.yml
+  vars:
+    ivar_user: "{{ outer_item }}"
+    ivar_metadata:
+      groups:
+        - sudo
+  loop: "{{ hm_accounts__admins }}"
+  loop_control:
+    loop_var: outer_item
+    label: "Managing local user account for admin {{ outer_item }}"
+
+- name: Configuring sudo for local admin accounts
+  template:
+    src: "{{ item }}"
+    dest: /etc/sudoers
+    owner: root
+    group: root
+    mode: 0440
+    backup: yes
+  with_first_found:
+    - "host_files/{{ inventory_hostname }}/sudoers.j2"
+    - "group_files/servers-production/sudoers.{{ ansible_lsb['codename'] }}.j2"
+    - "group_files/servers-production/sudoers.j2"
+    - "group_files/servers-development/sudoers.{{ ansible_lsb['codename'] }}.j2"
+    - "group_files/servers-development/sudoers.j2"
+    - "group_files/servers-demo/sudoers.{{ ansible_lsb['codename'] }}.j2"
+    - "group_files/servers-demo/sudoers.j2"
+    - "group_files/servers/sudoers.{{ ansible_distribution_release }}.j2"
+    - "group_files/servers/sudoers.j2"
+    - "sudoers.{{ ansible_distribution_release }}.j2"
+    - "sudoers.j2"
+  when: hm_accounts__configure_sudo
+
+- name: Getting current members of the sudo group
+  command: members sudo
+  register: current_sudo_members
+  changed_when: False
+
+- debug: var=current_sudo_members
+  tags:
+    - debug
+
+- set_fact:
+    current_sudo_member_list: "{{ current_sudo_members.stdout.split(' ') }}"
+
+- debug: var=current_sudo_member_list
+  tags:
+    - debug
+
+- name: Removing extra users from sudo group
+  command: "deluser {{ item }} sudo"
+  loop: "{{ current_sudo_member_list }}"
+  when: item not in hm_accounts__admins and not (item in hm_accounts__users and 'groups' in hm_accounts__users[item] and 'sudo' in hm_accounts__users[item]['groups'])
+
+#-------------------------------------------------------------------------------
+
+- name: Creating local user groups
+  group:
+    name: "{{ item['key'] }}"
+    state: present
+  with_dict: "{{ hm_accounts__groups }}"
+
+- include_tasks: _func.manage_account.debian.yml
+  vars:
+    ivar_user: "{{ outer_item['key'] }}"
+    ivar_metadata: "{{ outer_item['value'] }}"
+  with_dict: "{{ hm_accounts__users }}"
+  loop_control:
+    loop_var: outer_item
+    label: "Managing local user account for regular user {{ outer_item }}"
