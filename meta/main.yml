@@ -1,4 +1,5 @@
 galaxy_info:
+  role_name: accounts
   author: Jan Mach
   description: Ansible role for convenient management of user accounts on target hosts.
   license: MIT
