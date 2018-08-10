@@ -40,6 +40,16 @@
 
 #-------------------------------------------------------------------------------
 
+- name: Managing home directory permissions
+  file:
+    path: "/home/{{ ivar_user }}"
+    owner: "{{ ivar_user }}"
+    group: "{{ ivar_user }}"
+    mode: 0750
+    state: directory
+
+#-------------------------------------------------------------------------------
+
 - name: Managing .ssh directory for local user account
   file:
     path: "/home/{{ ivar_user }}/.ssh"
