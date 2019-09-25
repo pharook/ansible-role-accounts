@@ -11,7 +11,7 @@
 #   git clone https://github.com/honzamach/ansible-role-accounts.git honzamach.accounts
 #
 
-- hosts: servers-accounts
+- hosts: servers_accounts
   remote_user: root
   roles:
     - role: honzamach.accounts
