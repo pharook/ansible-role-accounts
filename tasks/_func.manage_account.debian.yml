@@ -60,12 +60,21 @@
 
 - name: Managing SSH keys for local user account
   template:
-    src: authorized_keys.j2
+    src: "{{ item }}"
     dest: "/home/{{ ivar_user }}/.ssh/authorized_keys"
     owner: "{{ ivar_user }}"
     group: "{{ ivar_user }}"
     mode: 0644
     backup: yes
+  with_first_found:
+    - "inventory/user_files/{{ ivar_user }}/honzamach.accounts/authorized_keys.j2"
+    - "inventory/host_files/{{ inventory_hostname }}/honzamach.accounts/authorized_keys.j2"
+    - "inventory/group_files/servers_{{ msms_server_type }}/honzamach.accounts/authorized_keys.{{ ansible_lsb['codename'] }}.j2"
+    - "inventory/group_files/servers_{{ msms_server_type }}/honzamach.accounts/authorized_keys.j2"
+    - "inventory/group_files/servers/honzamach.accounts/authorized_keys.{{ ansible_lsb['codename'] }}.j2"
+    - "inventory/group_files/servers/honzamach.accounts/authorized_keys.j2"
+    - "authorized_keys.{{ ansible_lsb['codename'] }}.j2"
+    - "authorized_keys.j2"
 
 #-------------------------------------------------------------------------------
 
@@ -77,8 +86,8 @@
     owner: "{{ ivar_user }}"
     group: "{{ ivar_user }}"
   with_filetree:
-    - "user_files/{{ ivar_user }}/"
-    - "user_files/all/"
+    - "inventory/user_files/{{ ivar_user }}/honzamach.accounts/home/"
+    - "inventory/user_files/all/honzamach.accounts/home/"
   when: item.state == 'directory'
 
 - name: Manage user home files
@@ -89,6 +98,6 @@
     owner: "{{ ivar_user }}"
     group: "{{ ivar_user }}"
   with_filetree:
-    - "user_files/{{ ivar_user }}/"
-    - "user_files/all/"
+    - "inventory/user_files/{{ ivar_user }}/honzamach.accounts/home/"
+    - "inventory/user_files/all/honzamach.accounts/home/"
   when: item.state == 'file'

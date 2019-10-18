@@ -1,10 +1,5 @@
 ---
 
-- name: Including secret configurations
-  include_vars: "vault/secrets.yml"
-  tags:
-    - always
-
 - name: Including distribution specific variables
   include_vars: "{{ansible_distribution|lower}}.yml"
   tags:

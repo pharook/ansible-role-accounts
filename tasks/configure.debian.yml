@@ -9,24 +9,24 @@
     mode: 0644
     backup: yes
   with_first_found:
-    - "host_files/{{ inventory_hostname }}/sshd_config.j2"
-    - "group_files/servers-{{ msms_server_type }}/sshd_config.{{ ansible_lsb['codename'] }}.j2"
-    - "group_files/servers-{{ msms_server_type }}/sshd_config.j2"
-    - "group_files/servers/sshd_config.{{ ansible_lsb['codename'] }}.j2"
-    - "group_files/servers/sshd_config.j2"
+    - "inventory/host_files/{{ inventory_hostname }}/honzamach.accounts/sshd_config.j2"
+    - "inventory/group_files/servers_{{ msms_server_type }}/honzamach.accounts/sshd_config.{{ ansible_lsb['codename'] }}.j2"
+    - "inventory/group_files/servers_{{ msms_server_type }}/honzamach.accounts/sshd_config.j2"
+    - "inventory/group_files/servers/honzamach.accounts/sshd_config.{{ ansible_lsb['codename'] }}.j2"
+    - "inventory/group_files/servers/honzamach.accounts/sshd_config.j2"
     - "sshd_config.{{ ansible_lsb['codename'] }}.j2"
     - "sshd_config.j2"
   notify:
     - Restart OpenSSH service
   when: hm_accounts__configure_ssh
 
-- name: Ensuring OpenSSH server daemon is running and enabled at system start
+- name: Ensuring OpenSSH server is running and enabled at system start
   service:
     name: "{{ hm_accounts__service_name }}"
     state: started
     enabled: yes
 
-- name: Managing .ssh directory for root user
+- name: Managing SSH directory for root user
   file:
     path: /root/.ssh
     owner: root
@@ -36,12 +36,20 @@
 
 - name: Managing SSH keys for root user
   template:
-    src: authorized_keys.root.j2
+    src: "{{ item }}"
     dest: /root/.ssh/authorized_keys
     owner: root
     group: root
     mode: 0644
     backup: yes
+  with_first_found:
+    - "inventory/host_files/{{ inventory_hostname }}/honzamach.accounts/authorized_keys.root.j2"
+    - "inventory/group_files/servers_{{ msms_server_type }}/honzamach.accounts/authorized_keys.root.{{ ansible_lsb['codename'] }}.j2"
+    - "inventory/group_files/servers_{{ msms_server_type }}/honzamach.accounts/authorized_keys.root.j2"
+    - "inventory/group_files/servers/honzamach.accounts/authorized_keys.root.{{ ansible_lsb['codename'] }}.j2"
+    - "inventory/group_files/servers/honzamach.accounts/authorized_keys.root.j2"
+    - "authorized_keys.root.{{ ansible_lsb['codename'] }}.j2"
+    - "authorized_keys.root.j2"
 
 #-------------------------------------------------------------------------------
 
@@ -65,12 +73,12 @@
     mode: 0440
     backup: yes
   with_first_found:
-    - "host_files/{{ inventory_hostname }}/sudoers.j2"
-    - "group_files/servers-{{ msms_server_type }}/sudoers.{{ ansible_lsb['codename'] }}.j2"
-    - "group_files/servers-{{ msms_server_type }}/sudoers.j2"
-    - "group_files/servers/sudoers.{{ ansible_distribution_release }}.j2"
-    - "group_files/servers/sudoers.j2"
-    - "sudoers.{{ ansible_distribution_release }}.j2"
+    - "inventory/host_files/{{ inventory_hostname }}/honzamach.accounts/sudoers.j2"
+    - "inventory/group_files/servers_{{ msms_server_type }}/honzamach.accounts/sudoers.{{ ansible_lsb['codename'] }}.j2"
+    - "inventory/group_files/servers_{{ msms_server_type }}/honzamach.accounts/sudoers.j2"
+    - "inventory/group_files/servers/honzamach.accounts/sudoers.{{ ansible_lsb['codename'] }}.j2"
+    - "inventory/group_files/servers/honzamach.accounts/sudoers.j2"
+    - "sudoers.{{ ansible_lsb['codename'] }}.j2"
     - "sudoers.j2"
   when: hm_accounts__configure_sudo
 
