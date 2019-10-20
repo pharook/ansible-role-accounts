@@ -1,27 +1,26 @@
 ---
 
 #
-# This role expects, that file 'vault/secrets.yml' is present and contains following
-# dictionaries:
+# This role expects, that following dictionaries are present in the ansible environment:
 #
 # site_users:
 #    userid:
 #        name: User Name
+#        name_utf: Úsér Námě
 #        firstname: User
 #        lastname: Name
 #        email: user.name@domain.org
 #        ssh_keys:
 #            - "ssh-dss AAAA...== user@host"
 #            - "ssh-rsa AAAA...== user@host"
+#        workstations:
+#            - 192.168.1.1
+#            - ::1
 #
 # site_robots:
 #    hostid:
 #        ssh_keys:
 #            - "ssh-rsa AAAA...== root@host"
-#
-# This file can be protected for example by encfs utility and decrypted only when
-# necessary. Dictionaries described above are used as registries during role
-# configuration.
 #
 
 #
