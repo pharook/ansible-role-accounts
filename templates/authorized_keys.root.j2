@@ -7,14 +7,22 @@
 #
 #----------------------- <+++ansible-managed-file+++> -------------------------+
 
+#
+# SSH keys for PRIMARY admin '{{ primary_admin }}' ({{ site_users[primary_admin]['name'] }} <{{ site_users[primary_admin]['email'] }}>)
+#
+{% for key in site_users[primary_admin]['ssh_keys'] %}
+{{ key }}
+{% endfor %}
 {% for admin in hm_accounts__admins|sort %}
+{% if admin != primary_admin %}
+
 #
 # SSH keys for admin '{{ admin }}' ({{ site_users[admin]['name'] }} <{{ site_users[admin]['email'] }}>)
 #
 {% for key in site_users[admin]['ssh_keys'] %}
 {{ key }}
 {% endfor %}
-
+{% endif %}
 {% endfor %}
 {% if hm_accounts__robots|length %}
 {% for robot in hm_accounts__robots|sort %}
@@ -25,6 +33,5 @@
 {% for key in site_robots[robot]['ssh_keys'] %}
 {{ key }}
 {% endfor %}
-
 {% endfor %}
 {% endif %}
