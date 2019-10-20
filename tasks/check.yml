@@ -1,0 +1,30 @@
+---
+
+- name: "ASSERTION: 'primary_admin' is sane"
+  assert:
+    that:
+      - 'primary_admin is defined'
+      - 'primary_admin in site_users'
+      - 'primary_admin in hm_accounts__admins'
+      - '"name" in site_users[primary_admin] and site_users[primary_admin].name is defined'
+      - '"firstname" in site_users[primary_admin] and site_users[primary_admin].firstname is defined'
+      - '"lastname" in site_users[primary_admin] and site_users[primary_admin].lastname is defined'
+      - '"email" in site_users[primary_admin] and site_users[primary_admin].email is defined and "@" in site_users[primary_admin].email'
+      - '"ssh_keys" in site_users[primary_admin] and site_users[primary_admin].ssh_keys|length > 0'
+    msg: "Configuration value 'primary_admin' must contain admin identifier pointing to complete record in 'site_users'"
+  tags:
+    - check
+
+- name: "ASSERTION: 'hm_accounts__admins' are sane"
+  assert:
+    that:
+      - 'item in site_users'
+      - '"name" in site_users[item] and site_users[item].name is defined'
+      - '"firstname" in site_users[item] and site_users[item].firstname is defined'
+      - '"lastname" in site_users[item] and site_users[item].lastname is defined'
+      - '"email" in site_users[item] and site_users[item].email is defined and "@" in site_users[item].email'
+      - '"ssh_keys" in site_users[item] and site_users[item].ssh_keys|length > 0'
+    msg: "Configuration value 'hm_accounts__admins' must contain list of admin identifiers pointing to complete records in 'site_users'"
+  with_list: "{{ hm_accounts__admins }}"
+  tags:
+    - check
