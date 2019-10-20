@@ -36,7 +36,7 @@
 - name: Removing extra group memberships
   command: "deluser {{ ivar_user }} {{ item }}"
   loop: "{{ current_group_list }}"
-  when: item != ivar_user and item not in ivar_metadata.get('groups', [])
+  when: ivar_metadata.get('groups_remove_extra', False) and item != 'sudo' and item != ivar_user and item not in ivar_metadata.get('groups', [])
 
 #-------------------------------------------------------------------------------
 
