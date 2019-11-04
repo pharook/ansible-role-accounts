@@ -1,23 +1,18 @@
-- debug:
-    msg: "Managing local user account {{ ivar_user }}"
-  tags:
-    - debug
-
-- name: Creating local user account
+- name: "User '{{ ivar_user }}': Creating local account"
   user:
     name: "{{ ivar_user }}"
     shell: /bin/bash
 
 #-------------------------------------------------------------------------------
 
-- name: Managing group memberships
+- name: "User '{{ ivar_user }}': Managing group memberships"
   user:
     name: "{{ ivar_user }}"
     groups: "{{ item }}"
     append: yes
   with_items: "{{ ivar_metadata.get('groups', []) }}"
 
-- name: Getting current group memberships
+- name: "User '{{ ivar_user }}': Detecting current group memberships"
   command: "groups {{ ivar_user }}"
   register: current_group_memberships
   changed_when: False
@@ -26,21 +21,22 @@
   tags:
     - debug
 
-- set_fact:
+- name: "User '{{ ivar_user }}': Setting fact - current group memberships"
+  set_fact:
     current_group_list: "{{ current_group_memberships.stdout.replace(ivar_user+' : ', '').split(' ') }}"
 
 - debug: var=current_group_list
   tags:
     - debug
 
-- name: Removing extra group memberships
+- name: "User '{{ ivar_user }}': Removing extra group memberships"
   command: "deluser {{ ivar_user }} {{ item }}"
   loop: "{{ current_group_list }}"
   when: ivar_metadata.get('groups_remove_extra', False) and item != 'sudo' and item != ivar_user and item not in ivar_metadata.get('groups', [])
 
 #-------------------------------------------------------------------------------
 
-- name: Managing home directory permissions
+- name: "User '{{ ivar_user }}': Managing home directory permissions"
   file:
     path: "/home/{{ ivar_user }}"
     owner: "{{ ivar_user }}"
@@ -50,7 +46,7 @@
 
 #-------------------------------------------------------------------------------
 
-- name: Managing .ssh directory for local user account
+- name: "User '{{ ivar_user }}': Managing .ssh directory"
   file:
     path: "/home/{{ ivar_user }}/.ssh"
     owner: "{{ ivar_user }}"
@@ -58,7 +54,7 @@
     mode: 0700
     state: directory
 
-- name: Managing SSH keys for local user account
+- name: "User '{{ ivar_user }}': Managing SSH keys"
   template:
     src: "{{ item }}"
     dest: "/home/{{ ivar_user }}/.ssh/authorized_keys"
@@ -78,7 +74,7 @@
 
 #-------------------------------------------------------------------------------
 
-- name: Manage user home subdirectories
+- name: "User '{{ ivar_user }}': Manage user home subdirectories"
   file:
     path: "/home/{{ ivar_user }}/{{ item.path }}"
     state: directory
@@ -90,7 +86,7 @@
     - "inventory/user_files/all/honzamach.accounts/home/"
   when: item.state == 'directory'
 
-- name: Manage user home files
+- name: "User '{{ ivar_user }}': Manage user home files"
   template:
     src: "{{ item.src }}"
     dest: "/home/{{ ivar_user }}/{{ item.path }}"
