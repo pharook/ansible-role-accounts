@@ -1,6 +1,6 @@
 ---
 
-- name: Configuring OpenSSH server
+- name: "Configuring OpenSSH server"
   template:
     src: "{{ item }}"
     dest: /etc/ssh/sshd_config
@@ -20,13 +20,13 @@
     - Restart OpenSSH service
   when: hm_accounts__configure_ssh
 
-- name: Ensuring OpenSSH server is running and enabled at system start
+- name: "Ensuring OpenSSH server is running and enabled at system start"
   service:
     name: "{{ hm_accounts__service_name }}"
     state: started
     enabled: yes
 
-- name: Managing SSH directory for root user
+- name: "User 'root': Managing SSH directory"
   file:
     path: /root/.ssh
     owner: root
@@ -34,7 +34,7 @@
     mode: 0700
     state: directory
 
-- name: Managing SSH keys for root user
+- name: "User 'root': Managing SSH keys"
   template:
     src: "{{ item }}"
     dest: /root/.ssh/authorized_keys
@@ -62,9 +62,9 @@
   loop: "{{ hm_accounts__admins }}"
   loop_control:
     loop_var: outer_item
-    label: "Managing local user account for admin {{ outer_item }}"
+    label: "Managing local user account for admin '{{ outer_item }}'"
 
-- name: Configuring sudo for local admin accounts
+- name: "Configuring sudo for local admin accounts"
   template:
     src: "{{ item }}"
     dest: /etc/sudoers
@@ -82,7 +82,7 @@
     - "sudoers.j2"
   when: hm_accounts__configure_sudo
 
-- name: Getting current members of the sudo group
+- name: "Getting current members of the 'sudo' group"
   command: members sudo
   register: current_sudo_members
   changed_when: False
@@ -91,21 +91,24 @@
   tags:
     - debug
 
-- set_fact:
+- name: "Setting fact - current 'sudo' group memberships"
+  set_fact:
     current_sudo_member_list: "{{ current_sudo_members.stdout.split(' ') }}"
 
 - debug: var=current_sudo_member_list
   tags:
     - debug
 
-- name: Removing extra users from sudo group
+- name: "Removing extra users from 'sudo' group"
   command: "deluser {{ item }} sudo"
   loop: "{{ current_sudo_member_list }}"
-  when: item not in hm_accounts__admins and not (item in hm_accounts__users and 'groups' in hm_accounts__users[item] and 'sudo' in hm_accounts__users[item]['groups'])
+  when: >
+    item not in hm_accounts__admins and not
+    (item in hm_accounts__users and 'groups' in hm_accounts__users[item] and 'sudo' in hm_accounts__users[item]['groups'])
 
 #-------------------------------------------------------------------------------
 
-- name: Creating local user groups
+- name: "Creating local user groups"
   group:
     name: "{{ item['key'] }}"
     state: present
@@ -118,4 +121,4 @@
   with_dict: "{{ hm_accounts__users }}"
   loop_control:
     loop_var: outer_item
-    label: "Managing local user account for regular user {{ outer_item }}"
+    label: "Managing local user account for regular user '{{ outer_item }}'"
