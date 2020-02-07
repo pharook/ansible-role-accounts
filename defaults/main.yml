@@ -1,69 +1,28 @@
 ---
 
-#
-# This role expects, that following dictionaries are present in the ansible environment:
-#
-# site_users:
-#    userid:
-#        name: User Name
-#        name_utf: Úsér Námě
-#        firstname: User
-#        lastname: Name
-#        email: user.name@domain.org
-#        ssh_keys:
-#            - "ssh-dss AAAA...== user@host"
-#            - "ssh-rsa AAAA...== user@host"
-#        workstations:
-#            - 192.168.1.1
-#            - ::1
-#
-# site_robots:
-#    hostid:
-#        ssh_keys:
-#            - "ssh-rsa AAAA...== root@host"
-#
+site_users:
 
-#
-# Enable/disable OpenSSH configuration, valid values are bool [true, false]. When
-# set to ``false`` do not touch the configuration file.
-#
+site_robots:
+
+primary_admin:
+
+hm_accounts__install_packages:
+  debian:
+    apt:
+      - members
+      - openssh-server
+      - sudo
+
 hm_accounts__configure_ssh: true
 
-#
-# Enable/disable sudo configuration, valid values are bool [true, false]. When
-# set to ``false`` do not touch the configuration file.
-#
 hm_accounts__configure_sudo: true
 
-#
-# Turn on/off SSH password authentication, valid values are string ["yes","no"].
-#
 hm_accounts__password_authentication: "yes"
 
-#
-# List of all system administrators, that should have 'root' access to target system.
-# Values entered in this list are keys pointing to the 'site_users' dictionary
-# described above.
-#
 hm_accounts__admins: []
 
-#
-# List of all robots, that should have 'root' access to target system.
-# Values entered in this list are keys pointing to the 'site_robots' dictionary
-# described above.
-#
 hm_accounts__robots: []
 
-#
-# Dict of all unprivileged user groups, that should be present on target system.
-# Keys of the dictionary should be the desired system names of the groups, values
-# should be dictionaries that may contain additional parameters.
-#
 hm_accounts__groups: {}
 
-#
-# Dict of all unprivileged user accounts, that should be present on target system.
-# Keys of the dictionary should point to the 'site_users' dictionary described
-# above, values should be dictionaries that may contain additional parameters.
-#
 hm_accounts__users: {}

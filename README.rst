@@ -3,47 +3,64 @@
 Role **accounts**
 ================================================================================
 
-Ansible role for convenient management of user accounts on target hosts.
-
 * `Ansible Galaxy page <https://galaxy.ansible.com/honzamach/accounts>`__
 * `GitHub repository <https://github.com/honzamach/ansible-role-accounts>`__
 * `Travis CI page <https://travis-ci.org/honzamach/ansible-role-accounts>`__
-
-
-Description
---------------------------------------------------------------------------------
 
 Main purpose of this role is to perform user and group account and access management.
 The most important tasks are following:
 
 * Installation and optional configuration of ``OpenSSH`` server
 * Installation and optional configuration of ``sudo``
-* Management of ``authorized_keys`` file for *root* user
+* Management of ``/root/.ssh/authorized_keys`` file for *root* user
 * Management of unprivileged user groups
 * Management of unprivileged user accounts
   * manage group memberships
   * manage content of home directory
   * manage ``authorized_keys`` files
 
-.. note::
+**Table of Contents:**
 
-    This role requires the :ref:`secure registry <section-overview-secure-registry>` feature.
+* :ref:`section-role-accounts-installation`
+* :ref:`section-role-accounts-dependencies`
+* :ref:`section-role-accounts-usage`
+* :ref:`section-role-accounts-variables`
+* :ref:`section-role-accounts-files`
+* :ref:`section-role-accounts-author`
 
-    This role supports the :ref:`template customization <section-overview-customize-templates>` feature.
+This role is part of the `MSMS <https://github.com/honzamach/msms>`__ package.
+Some common features are documented in its :ref:`manual <section-manual>`.
 
 
-Requirements
+.. _section-role-accounts-installation:
+
+Installation
 --------------------------------------------------------------------------------
 
-This role does not have any special requirements.
+To install the role `honzamach.accounts <https://galaxy.ansible.com/honzamach/accounts>`__
+from `Ansible Galaxy <https://galaxy.ansible.com/>`__ please use variation of
+following command::
 
+    ansible-galaxy install honzamach.accounts
+
+To install the role directly from `GitHub <https://github.com>`__ by cloning the
+`ansible-role-accounts <https://github.com/honzamach/ansible-role-accounts>`__
+repository please use variation of following command::
+
+    git clone https://github.com/honzamach/ansible-role-accounts.git honzamach.accounts
+
+Currently the advantage of using direct Git cloning is the ability to easily update
+the role when new version comes out.
+
+
+.. _section-role-accounts-dependencies:
 
 Dependencies
 --------------------------------------------------------------------------------
 
 This role is not dependent on any other role.
 
-Following roles have direct dependency on this role:
+Following roles have dependency on this role:
 
 * :ref:`firewalled <section-role-firewalled>`
 
@@ -55,27 +72,160 @@ Following roles have direct dependency on this role:
 * :ref:`puppeteer <section-role-puppeteer>`
 
 
-Managed files
+.. _section-role-accounts-usage:
+
+Usage
 --------------------------------------------------------------------------------
 
-This role directly manages content of following files on target system:
+Example content of inventory file ``inventory``::
 
-* ``/etc/sudoers``
-* ``/etc/ssh/sshd_config``
-* ``/root/.ssh/authorized_keys``
-* ``/home/ ... /.ssh/authorized_keys``
-* additional files in user home directories as defined by users
+    [servers_accounts]
+    your-server
 
-  If you provide any content in ``user_files/all`` or ``user_files/[user_name]``
-  directories in your playbook root directory, all files and directories will be
-  transfered to the user`s home folder on target host.
+Example content of role playbook file ``role_playbook.yml``::
+
+    - hosts: servers_accounts
+      remote_user: root
+      roles:
+        - role: honzamach.accounts
+      tags:
+        - role-accounts
+
+Example usage::
+
+    # Run everything:
+    ansible-playbook --ask-vault-pass --inventory inventory role_playbook.yml
+
+    # Do not touch OpenSSH configuration file:
+    ansible-playbook --ask-vault-pass --inventory inventory role_playbook.yml --extra-vars '{"hm_accounts__configure_ssh":false}'
+
+    # Do not touch sudo configuration file:
+    ansible-playbook --ask-vault-pass --inventory inventory role_playbook.yml --extra-vars '{"hm_accounts__configure_sudo":false}'
+
+It is recommended to follow these configuration principles:
+
+* Create file ``inventory/group_vars/all/users.yml`` and within define database
+  of your users::
+
+        site_users:
+            userid:
+                name: User Name
+                name_utf: Úšěř Ňámé
+                firstname: User
+                lastname: Name
+                email: user.name@domain.org
+                ssh_keys:
+                    - "ssh-rsa AAAA..."
+                    - "ssh-rsa AAAA..."
+                workstations:
+                    - "192.168.1.1"
+                    - "::1"
+            ...
+
+* Create/edit file ``inventory/group_vars/all/vars.yml`` and within define some sensible
+  defaults for all your managed servers::
+
+        # There will probably be same primary administrator on all your servers:
+        primary_admin: userid
+
+        # You are probably always using only SSH keys, aren`t you:
+        hm_accounts__password_authentication: no
+
+        # There is probably same set of secondary administrators:
+        hm_accounts__admins:
+          - userid
+          - ...
+
+* Use files ``inventory/host_vars/[your-server]/vars.yml`` to customize settings
+  for particular servers. Please see section :ref:`section-role-accounts-variables`
+  for all available options.
 
 
-Role variables
+.. _section-role-accounts-variables:
+
+Configuration variables
 --------------------------------------------------------------------------------
 
-There are following internal role variables defined in ``defaults/main.yml`` file,
-that can be overriden and adjusted as needed:
+
+Internal role variables
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. note::
+
+    This role utilizes the :ref:`secure registry <section-overview-secure-registry>`
+    feature.
+
+.. envvar:: site_users
+
+    This is one of the most important configuration variables. It is in fact simple
+    JSON database of all known user accounts and their personal data. It is intended
+    to be used by other roles, so it is intentionally named without role prefix.
+
+    * *Datatype:* ``dict``
+    * *Default:* ``null``
+    * *Example:*
+
+    .. code-block:: yaml
+
+        site_users:
+            userid:
+                name: User Name
+                name_utf: Úšěř Ňámé
+                firstname: User
+                lastname: Name
+                email: user.name@domain.org
+                ssh_keys:
+                    - "ssh-rsa AAAA..."
+                    - "ssh-rsa AAAA..."
+                workstations:
+                    - "192.168.1.1"
+                    - "::1"
+            ...
+
+.. envvar:: site_robots
+
+    Similarly to the :envvar:`site_users` variable it is simple JSON database of
+    all known site hosts. It is intended to be used by other roles, so it is
+    intentionally named without role prefix.
+
+    * *Datatype:* ``dict``
+    * *Default:* ``null``
+    * *Example:*
+
+    .. code-block:: yaml
+
+        site_hosts:
+            hostname:
+                ssh_keys:
+                    - "ssh-dss AAAA..."
+            ...
+
+.. envvar:: primary_admin
+
+    Identifier of the primary administrator of paticular server. It must point to valid entry
+    in :envvar:`site_users` configuration structure. It is intended to be used by other roles,
+    so it is intentionally named without role prefix.
+
+    * *Datatype:* ``string``
+    * *Default:* ``null``
+
+.. envvar:: hm_accounts__install_packages
+
+    List of packages defined separately for each linux distribution and package manager,
+    that MUST be present on target system. Any package on this list will be installed on
+    target host. This role currently recognizes only ``apt`` for ``debian``.
+
+    * *Datatype:* ``dict``
+    * *Default:* (please see YAML file ``defaults/main.yml``)
+    * *Example:*
+
+    .. code-block:: yaml
+
+        hm_accounts__install_packages:
+          debian:
+            apt:
+              - sudo
+              - ...
 
 .. envvar:: hm_accounts__configure_ssh
 
@@ -102,18 +252,18 @@ that can be overriden and adjusted as needed:
 
 .. envvar:: hm_accounts__admins
 
-    List containing identifiers of all system administrators, that should
-    have *root* access to target system. Identifiers must point to valid entry
-    in :envvar:`site_users` secret configuration structure.
+    List containing identifiers of all system administrator accounts, that should
+    have **root** access to target system. Identifiers must point to valid entry
+    in :envvar:`site_users` configuration structure.
 
     * *Datatype:* ``list of strings``
     * *Default:* ``[]`` (empty list)
 
 .. envvar:: hm_accounts__robots
 
-    List containing identifiers of all robotic accounts, that should have *root* access
+    List containing identifiers of all robotic accounts, that should have **root** access
     to target system. Identifiers must point to valid entry in :envvar:`site_robots`
-    secret configuration structure.
+    configuration structure.
 
     * *Datatype:* ``list of strings``
     * *Default:* ``[]`` (empty list)
@@ -121,8 +271,9 @@ that can be overriden and adjusted as needed:
 .. envvar:: hm_accounts__groups
 
     Dictionary containing all unprivileged user groups, that should be present
-    on target system. The data under each key should currently be empty dictionary,
-    in the future perhaps some group options may be possible.
+    on target system. Keys of the dictionary should be the desired system names
+    of the groups, values should be dictionaries that may contain additional
+    parameters to be possibly used by other roles.
 
     * *Datatype:* ``dictionary of dictionaries``
     * *Default:* ``{}`` (empty dictionary)
@@ -130,92 +281,51 @@ that can be overriden and adjusted as needed:
 .. envvar:: hm_accounts__users
 
     Dictionary containing all unprivileged user accounts, that should be present
-    on target system. Subdictionaries may contain *groups* attribute, which may
-    contain list of all user groups that the user should be member of.
+    on target system. Keys of the dictionary should be the desired user account
+    names, values should be dictionaries that may contain additional parameters
+    to be possibly used by other roles. Currently the only supported additional
+    parameter is ``groups``, which
 
     * *Datatype:* ``dictionary of dictionaries``
     * *Default:* ``{}`` (empty dictionary)
 
 
-Usage and customization
+Built-in Ansible variables
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+:envvar:`ansible_lsb['codename']`
+
+    Linux distribution codename. It is used for :ref:`template customizations <section-overview-role-customize-templates>`.
+
+
+.. _section-role-accounts-files:
+
+Managed files
 --------------------------------------------------------------------------------
 
-This role is (attempted to be) written according to the `Ansible best practices <https://docs.ansible.com/ansible/latest/user_guide/playbooks_best_practices.html>`__. The default implementation should fit most users,
-however you may customize it by tweaking default variables and providing custom
-templates.
+.. note::
+
+    This role supports the :ref:`template customization <section-overview-role-customize-templates>` feature.
+
+This role manages content of following files on target system:
+
+* ``/etc/sudoers`` *[TEMPLATE]*
+* ``/etc/ssh/sshd_config`` *[TEMPLATE]*
+* ``/root/.ssh/authorized_keys`` *[TEMPLATE]*
+* ``/home/ ... /.ssh/authorized_keys`` *[TEMPLATE]*
+* additional files in user home directories as defined by users
+
+If you provide any content in ``user_files/all`` or ``user_files/[user_name]``
+directories in your inventory directory, all files and directories will be
+transfered to the user`s home folder on target host.
 
 
-Variable customizations
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. _section-role-accounts-author:
 
-Most of the usefull variables are defined in ``defaults/main.yml`` file, so they
-can be easily overridden almost from `anywhere <https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#variable-precedence-where-should-i-put-a-variable>`__.
-
-
-Template customizations
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-This roles uses *with_first_found* mechanism for all of its templates. If you do
-not like anything about built-in template files you may provide your own custom
-templates. For now please see the role tasks for list of all checked paths for
-each of the template files.
-
-
-Installation
+Author and license
 --------------------------------------------------------------------------------
 
-To install the role `honzamach.accounts <https://galaxy.ansible.com/honzamach/accounts>`__
-from `Ansible Galaxy <https://galaxy.ansible.com/>`__ please use variation of
-following command::
-
-    ansible-galaxy install honzamach.accounts
-
-To install the role directly from `GitHub <https://github.com>`__ by cloning the
-`ansible-role-accounts <https://github.com/honzamach/ansible-role-accounts>`__
-repository please use variation of following command::
-
-    git clone https://github.com/honzamach/ansible-role-accounts.git honzamach.accounts
-
-Currently the advantage of using direct Git cloning is the ability to easily update
-the role when new version comes out.
-
-
-Example Playbook
---------------------------------------------------------------------------------
-
-Example content of inventory file ``inventory``::
-
-    [servers_accounts]
-    localhost
-
-Example content of role playbook file ``playbook.yml``::
-
-    - hosts: servers_accounts
-      remote_user: root
-      roles:
-        - role: honzamach.accounts
-      tags:
-        - role-accounts
-
-Example usage::
-
-    # Run everything:
-    ansible-playbook -i inventory playbook.yml
-
-    # Do not touch OpenSSH configuration file:
-    ansible-playbook -i inventory playbook.yml --extra-vars '{"hm_accounts__configure_ssh":false}'
-
-    # Do not touch sudo configuration file:
-    ansible-playbook -i inventory playbook.yml --extra-vars '{"hm_accounts__configure_sudo":false}'
-
-
-License
---------------------------------------------------------------------------------
-
-MIT
-
-
-Author Information
---------------------------------------------------------------------------------
-
-Jan Mach <honza.mach.ml@gmail.com>
+| *Copyright:* (C) since 2019 Honza Mach <honza.mach.ml@gmail.com>
+| *Author:* Honza Mach <honza.mach.ml@gmail.com>
+| Use of this role is governed by the MIT license, see LICENSE file.
+|
