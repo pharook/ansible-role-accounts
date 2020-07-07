@@ -1,4 +1,4 @@
-.. _section-cookbook-roles-cleanup:
+.. _section-cookbook-roles-accounts:
 
 Account management
 ================================================================================
