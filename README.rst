@@ -324,14 +324,52 @@ Managed files
 This role manages content of following files on target system:
 
 * ``/etc/sudoers`` *[TEMPLATE]*
-* ``/etc/ssh/sshd_config`` *[TEMPLATE]*
-* ``/root/.ssh/authorized_keys`` *[TEMPLATE]*
-* ``/home/ ... /.ssh/authorized_keys`` *[TEMPLATE]*
-* additional files in user home directories as defined by users
 
-If you provide any content in ``user_files/all`` or ``user_files/[user_name]``
-directories in your inventory directory, all files and directories will be
-transfered to the user`s home folder on target host.
+  Customizable with following templates::
+
+    ``inventory/host_files/{{ inventory_hostname }}/honzamach.accounts/sudoers.j2``
+    ``inventory/group_files/servers_{{ msms_server_type }}/honzamach.accounts/sudoers.{{ ansible_lsb['codename'] }}.j2``
+    ``inventory/group_files/servers_{{ msms_server_type }}/honzamach.accounts/sudoers.j2``
+    ``inventory/group_files/servers/honzamach.accounts/sudoers.{{ ansible_lsb['codename'] }}.j2``
+    ``inventory/group_files/servers/honzamach.accounts/sudoers.j2``
+
+* ``/etc/ssh/sshd_config`` *[TEMPLATE]*
+
+  Customizable with following templates::
+
+    ``inventory/host_files/{{ inventory_hostname }}/honzamach.accounts/sshd_config.j2``
+    ``inventory/group_files/servers_{{ msms_server_type }}/honzamach.accounts/sshd_config.{{ ansible_lsb['codename'] }}.j2``
+    ``inventory/group_files/servers_{{ msms_server_type }}/honzamach.accounts/sshd_config.j2``
+    ``inventory/group_files/servers/honzamach.accounts/sshd_config.{{ ansible_lsb['codename'] }}.j2``
+    ``inventory/group_files/servers/honzamach.accounts/sshd_config.j2``
+
+* ``/root/.ssh/authorized_keys`` *[TEMPLATE]*
+
+  Customizable with following templates::
+
+    ``inventory/host_files/{{ inventory_hostname }}/honzamach.accounts/authorized_keys.root.j2``
+    ``inventory/group_files/servers_{{ msms_server_type }}/honzamach.accounts/authorized_keys.root.{{ ansible_lsb['codename'] }}.j2``
+    ``inventory/group_files/servers_{{ msms_server_type }}/honzamach.accounts/authorized_keys.root.j2``
+    ``inventory/group_files/servers/honzamach.accounts/authorized_keys.root.{{ ansible_lsb['codename'] }}.j2``
+    ``inventory/group_files/servers/honzamach.accounts/authorized_keys.root.j2``
+
+* ``/home/ ... /.ssh/authorized_keys`` *[TEMPLATE]*
+
+  Customizable with following templates::
+
+    ``inventory/user_files/{{ ivar_user }}/honzamach.accounts/authorized_keys.j2``
+    ``inventory/host_files/{{ inventory_hostname }}/honzamach.accounts/authorized_keys.j2``
+    ``inventory/group_files/servers_{{ msms_server_type }}/honzamach.accounts/authorized_keys.{{ ansible_lsb['codename'] }}.j2``
+    ``inventory/group_files/servers_{{ msms_server_type }}/honzamach.accounts/authorized_keys.j2``
+    ``inventory/group_files/servers/honzamach.accounts/authorized_keys.{{ ansible_lsb['codename'] }}.j2``
+    ``inventory/group_files/servers/honzamach.accounts/authorized_keys.j2``
+
+* Additional files in user home directories for particular users.
+
+  If you provide any content in ``user_files/all/honzamach.accounts/home/`` or
+  ``user_files/[user_name]/honzamach.accounts/home/`` directories in your inventory
+  directory, all files and directories will be transfered to the user`s home directory
+  on target host.
 
 
 .. _section-role-accounts-author:
