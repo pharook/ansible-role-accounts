@@ -7,17 +7,17 @@ Role **accounts**
 * `GitHub repository <https://github.com/honzamach/ansible-role-accounts>`__
 * `Travis CI page <https://travis-ci.org/honzamach/ansible-role-accounts>`__
 
-Main purpose of this role is to perform user and group account and access management.
+Main purpose of this role is to perform user and group account management.
 The most important tasks are following:
 
-* Installation and optional configuration of ``OpenSSH`` server
-* Installation and optional configuration of ``sudo``
-* Management of ``/root/.ssh/authorized_keys`` file for *root* user
-* Management of unprivileged user groups
-* Management of unprivileged user accounts
-  * manage group memberships
-  * manage content of home directory
-  * manage ``authorized_keys`` files
+* Installation and optional configuration of ``OpenSSH`` server.
+* Installation and optional configuration of ``sudo``.
+* Management of ``/root/.ssh/authorized_keys`` file for *root* user.
+* Management of unprivileged user groups.
+* Management of unprivileged user accounts.
+  * Manage group memberships.
+  * Manage content of home directory.
+  * Manage ``authorized_keys`` files.
 
 **Table of Contents:**
 
@@ -68,8 +68,19 @@ Following roles have dependency on this role:
   correctly open the firewall and make system accessible to appropriate users.
 
 * :ref:`alchemist <section-role-alchemist>`
+
+  This role uses the user account structure to create system accounts for  projects
+  hosted on the server.
+
 * :ref:`logserver <section-role-logserver>`
+
+  This role uses the account features to enable access to server log for
+  administrators.
+
 * :ref:`puppeteer <section-role-puppeteer>`
+
+  This role uses the user account structure to create system accounts for  projects
+  hosted on the server.
 
 
 .. _section-role-accounts-usage:
@@ -78,6 +89,9 @@ Usage
 --------------------------------------------------------------------------------
 
 Example content of inventory file ``inventory``::
+
+    [servers]
+    your-server
 
     [servers_accounts]
     your-server
