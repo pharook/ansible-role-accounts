@@ -16,6 +16,7 @@
   command: "groups {{ ivar_user }}"
   register: current_group_memberships
   changed_when: False
+  check_mode: No
 
 - debug: var=current_group_memberships
   tags:
