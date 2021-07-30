@@ -86,6 +86,7 @@
   command: members sudo
   register: current_sudo_members
   changed_when: False
+  check_mode: No
 
 - debug: var=current_sudo_members
   tags:
